@@ -108,7 +108,7 @@ class ScrapingDatasetController {
                 var url = "https://www.lapor.go.id/laporan?page="+page
                 const html = await axios.get(url, {
                     headers: {
-                        Cookie: "user_auth=eyJpdiI6IjZLVVF1aVlldkNRVmRwYnh4RU9aQmc9PSIsInZhbHVlIjoiS2VDdzB0ZDlOWTJUYVZJeTJTY0VVcVNqbEYrc2VsMWpMMkZ1b0p3d3pQOEFHNGpWd3ViXC9QK05TU2I4YnJzNG9OMDVLRmRXd0NZQUZ5c21IUVZ1c1VubFhHbmp4TGJaOFcrZlJhSlREaGc0U0FTeWRUVXE0TE9uQ1B3bnlUV1NOIiwibWFjIjoiZDdlMTg0OGUyYzZkNmE2ZTZlYTBjODhlMmU5MmRhNjkzZTA1YTI3ODFlZjcxNjdhZmI4NmI2OGJhN2RkYWQ4NSJ9;"
+                        Cookie: "user_auth={masukkan token user};"
                     }
                 }).then(html => {
                     page ++
