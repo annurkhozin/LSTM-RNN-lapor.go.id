@@ -16,3 +16,12 @@ Run the following command to run startup migrations.
 ```js
 adonis migration:run
 ```
+
+### Run Application
+
+Run the following command to run aplication.
+
+```js
+adonis serve --dev
+```
+or use `node server.js`.
