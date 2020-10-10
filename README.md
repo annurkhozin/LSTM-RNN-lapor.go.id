@@ -16,7 +16,7 @@ adonis migration:run
 
 ### Run Application
 
-Run the following command to run aplication.
+Run the following command to run Application.
 
 ```js
 adonis serve --dev
