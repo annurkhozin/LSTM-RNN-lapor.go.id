@@ -1,0 +1,80 @@
+@layout('template')
+
+@section('content')
+<div class="row">
+    <div class="col-md-12 col-xs-12">
+        <div class="box-content">
+            <table style="font-size:14px;" class="table table-striped table-bordered datatable" style="width:100%">
+                <thead>
+                    <tr>
+                        <th class="text-center">Teks Input</th>
+                        <th>Prediksi label</th>
+                        <th>IP</th>
+                        <th>Tanggal Akses</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>              
+    </div>
+</div>
+
+<script>
+  $('.datatable').DataTable( {
+      "processing": false,
+      "serverSide": true,
+      "ajax": "getHistoryAPI",
+      "aoColumns": [
+          {
+            "mData": "teks",
+            "mRender": function (data, type, row) {
+                return '<p style="text-align: justify;text-justify: inter-word;">'+data+'</p>'
+            }
+          },
+          { "data": "prediksi_label" },
+          { "data": "ip_address" },
+          {
+            "mData": "tgl_akses",
+            "mRender": function (data, type, row) {
+                return formatDate(data)
+            }
+          }
+      ]          
+  })
+  function formatDate(tgl) {
+    var Digital=new Date(tgl);
+    var hours=Digital.getHours();
+    var minutes=Digital.getMinutes();
+    var seconds=Digital.getSeconds();
+    var day=Digital.getDate();
+    var years=Digital.getFullYear();
+    var month = new Array();
+    month[0] = "Januari";
+    month[1] = "Februari";
+    month[2] = "Maret";
+    month[3] = "April";
+    month[4] = "Mei";
+    month[5] = "Juni";
+    month[6] = "Juli";
+    month[7] = "Agustus";
+    month[8] = "September";
+    month[9] = "Oktober";
+    month[10] = "November";
+    month[11] = "Desember";
+    var month = month[Digital.getMonth()];
+      if (hours<=9){
+        hours="0"+hours;
+      }
+      if (minutes<=9){
+        minutes="0"+minutes;
+      }
+      if (seconds<=9){
+        seconds="0"+seconds;
+      }
+      var tampil=hours+":"+minutes+":"+seconds;
+      var tampil_day=day+" "+month+" "+years;
+
+      return tampil_day+ " "+tampil
+      
+  }
+</script>
+@endsection

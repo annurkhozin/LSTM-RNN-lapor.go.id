@@ -1,0 +1,121 @@
+<style>
+* {
+  box-sizing: border-box;
+}
+
+img {
+  display: block;
+  width: 40%;
+  margin: 20px auto;
+}
+
+.login-box {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    border: 1px solid #D0D0D0;
+    background-color: #ffffff;
+    width: 350px;
+    max-width: 95%;
+    overflow: hidden;
+    box-shadow: 0 2px 10px -3px #333;
+    text-align: center;
+}
+.form-login{
+  margin: 20px;
+}
+input {
+    border-radius: 3px;
+    padding: 10px 15px;
+    width: 90%;
+    border: 1px solid #D9D9D9;
+    outline: none;
+    display: block;
+    margin: 20px auto 20px auto;
+}
+
+button {
+    border: none;
+    background: #124db9;
+    width: 50%;
+    padding: 10px;
+    color: #FFFFFF;
+    margin-top: 25px;
+    box-shadow: 0 2px 10px -3px #719BE6;
+    display: block;
+    margin: 55px auto 10px auto;
+}
+
+p.line {
+    text-align: right;
+    font-size: 11px;
+    border-top: 1px solid #D0D0D0;
+    line-height: 32px;
+    padding: 0 10px 0 10px;
+    margin: 20px 0 0 0;
+}
+
+</style>
+<div class="login-box">
+  <img src="/img/logo_lapor.png">
+  <p style="color: #6c747d;">Hai sobat, silahkan masuk terlebih dahulu</p>
+  <p class="line">&nbsp;</p>
+  <form class="form-login">
+    {{ csrfField() }}
+    
+    <input type="text" class="form-control username" name="username" placeholder="Username" /> 
+    <input type="password" class="form-control password" name="password" placeholder="Password" />
+  </form>
+    <button onclick="auth()" class="button"> Masuk</button> 
+    <p class="line">&nbsp;</p>
+</div>
+<script>
+  message('error','Mohon Login terlebih dahulu');
+  function auth(){
+    var username = $('.username').val();
+    var password = $('.password').val();
+    if(!username){
+      message('warning','Username harus diisi');
+      $('.username').focus();
+    }else if(!password){
+      message('warning','Password harus diisi');
+      $('.password').focus();
+    }else{
+      var data = $('.form-login').serialize();
+      $.ajax({
+        url: "auth",
+        method:"POST",
+        data: data,
+        cache:false,
+        success:function(resp){
+          if(resp['status']){
+            message('info',resp['message']);
+            setTimeout(
+              "sammyApp.refresh()"
+              ,2000);
+          }else{
+            message('error',resp['message']);
+          }
+        }, error: function (status) {
+          message("error","Pastikan koneksi internet anda terhubung");
+        }
+      })
+    }
+  }
+  $('.username').keypress(function (e) {
+    var key = e.which;
+    if(key == 13) {
+        $('.button').click();
+        return false;  
+      }
+  })
+  $('.password').keypress(function (e) {
+    var key = e.which;
+    if(key == 13) {
+        $('.button').click();
+        return false;  
+      }
+  })
+</script>

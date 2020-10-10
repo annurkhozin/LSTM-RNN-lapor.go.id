@@ -1,0 +1,603 @@
+@layout('template')
+
+@section('content')
+<div class="box-content">
+    <section id="tabs" class="project-tab">
+        <div class="col-md-12">
+            <nav>
+                <div class="nav nav-tabs nav-fill" role="tablist">
+                    <a class="nav-item nav-link active" data-toggle="tab" href=".tab-stop-word" role="tab" aria-selected="true"><i>Stop Words</i></a>
+                    <a class="nav-item nav-link" data-toggle="tab" href=".tab-slang-word" role="tab" aria-selected="false"><i>Slang Words</i></a>
+                    <a class="nav-item nav-link" data-toggle="tab" href=".tab-kata-dasar" role="tab" aria-selected="false"><i>Root Words</i></a>
+                </div>
+            </nav>
+            <div class="tab-content">
+                <div class="tab-pane fade show active tab-stop-word" role="tabpanel">
+                    <div class="card border-light">
+                        <div class="card-body">
+                            <div class="alert alert-warning" role="alert">
+                                <i class="icofont-info-circle"></i> <i>Stop words</i> merupakan kata-kata umum yang biasanya muncul dalam jumlah besar dan dianggap tidak memiliki makna.
+                            </div>
+                            <div class="input-group card-title">
+                                <input type="text" class="form-control word" placeholder="Kata baru">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="addStopWord()">Simpan</button>
+                                </div>
+                            </div>
+                            <div class="stop-word text-justify"></div>
+                            <div class="text-center">
+                                <input type="hidden" class="stopWord_start" value="0">
+                                <input type="hidden" class="stopWord_limit" value="100">
+                                <button class="btn btn-outline-danger btn-sm stopword-loadmore" onclick="stopWord()"><i class="icofont-swoosh-down"></i> Lebih banyak</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade tab-slang-word" role="tabpanel">
+                    <div class="card border-light">
+                        <div class="card-body">
+                            <div class="alert alert-warning" role="alert">
+                                <i class="icofont-info-circle"></i> <i>Slang words</i> merupakan kata-kata informal yang seringkali di gunakan di dalam percakapan sehari-hari.
+                            </div>
+                            <div class="input-group card-title">
+                                <input type="text" class="form-control slangword" placeholder="Kata baru">
+                                <input type="text" class="form-control replace_slangword" placeholder="Makna kata">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="addSlangWord()">Simpan</button>
+                                </div>
+                            </div>
+                            <div class="slang-word text-justify"></div>
+                            <div class="text-center">
+                                <input type="hidden" class="slangWord_start" value="0">
+                                <input type="hidden" class="slangWord_limit" value="50">
+                                <button class="btn btn-outline-danger btn-sm slangword-loadmore" onclick="slangWord()"><i class="icofont-swoosh-down"></i> Lebih banyak</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade tab-kata-dasar" role="tabpanel">
+                    <div class="card border-light">
+                        <div class="card-body">
+                            <div class="alert alert-warning" role="alert">
+                                <i class="icofont-info-circle"></i> <i>Root words</i> merupakan kata dasar yang akan digunakan untuk membantu menentukan kata dasar dalam proses <i>stemming</i>.
+                            </div>
+                            <div class="input-group card-title">
+                                <input type="text" class="form-control rootword" placeholder="Kata baru">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="addRootWord()">Simpan</button>
+                                </div>
+                            </div>
+                            <div class="root-word text-justify"></div>
+                            <div class="text-center">
+                                <input type="hidden" class="rootWord_start" value="0">
+                                <input type="hidden" class="rootWord_limit" value="100">
+                                <button class="btn btn-outline-danger btn-sm rootword-loadmore" onclick="rootWord()"><i class="icofont-swoosh-down"></i> Lebih banyak</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<div class="modal fade bd-example-modal-sm menu-dialog-stopword" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title text-center col-md-12">Perbarui kata</h5>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <input type="hidden" class="form-control _id">
+                <input type="text" class="form-control _word" placeholder="Perbarui kata">
+            </div>
+            <div class="form-group text-center">
+                <button type="button" class="btn btn-primary" onclick="updateStopWord()">Simpan</button>
+                <button type="button" class="btn btn-danger" onclick="deleteStopWord()">Hapus</button>
+            </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal fade bd-example-modal-sm menu-dialog-slangword" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title text-center col-md-12">Perbarui kata</h5>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <input type="hidden" class="form-control _slangword_id">
+                <input type="hidden" class="form-control _slangword_old">
+                <input type="text" class="form-control _slangword" placeholder="Kata">
+            </div>
+            <div class="form-group">
+                <input type="text" class="form-control _replace_slangword" placeholder="Kata ganti">
+            </div>
+            <div class="form-group text-center">
+                <button type="button" class="btn btn-primary" onclick="updateSlangWord()">Simpan</button>
+                <button type="button" class="btn btn-danger" onclick="deleteSlangWord()">Hapus</button>
+            </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+<div class="modal fade bd-example-modal-sm menu-dialog-rootword" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title text-center col-md-12">Perbarui kata</h5>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <input type="hidden" class="form-control _rootword_id">
+                <input type="text" class="form-control _rootword" placeholder="Perbarui kata">
+            </div>
+            <div class="form-group text-center">
+                <button type="button" class="btn btn-primary" onclick="updateRootWord()">Simpan</button>
+                <button type="button" class="btn btn-danger" onclick="deleteRootWord()">Hapus</button>
+            </div>
+        </div>
+      </div>
+    </div>
+</div>
+
+<script>
+    
+    stopWord();
+    let stopWord_no = 0;
+    function stopWord(){
+        let start = $('.stopWord_start').val()
+        let limit = $('.stopWord_limit').val()
+        const data = {
+            start:  start,
+            limit:  limit
+        }
+        $.ajax({
+            url: "stopWord",
+            method:"GET",
+            cache:false,
+            data: data,
+            success:function(resp){
+                $('.word').val("")
+                const data = resp['data']
+                const count = parseInt(resp['count'])
+                var html = ""
+                if(start>0){
+                    html = $(".stop-word").html()
+                }
+                data.forEach(key => {
+                    if(stopWord_no!=0){html +=',';}
+                    html += '<button type="button" class="btn btn-link btn-sm" onclick="dialogStopWord(&#39;'+key._id+'&#39;,&#39;'+key.kata+'&#39;)" style="margin-right:3px;">'+key.kata+'</button>'
+                    stopWord_no++
+                });
+                start = stopWord_no
+                $('.stopWord_start').val(start)
+                $(".stop-word").html(html)
+                if((start>=count)){
+                    $('.stopword-loadmore').hide()
+                }
+            }, error: function (status) {
+                
+            }
+        })
+    }
+
+    function addStopWord(){
+        var word = $('.word').val();
+        if(!word){
+            message('warning','Stop-word harus diisi')
+            $('.word').focus()
+        }else{
+            const data = {
+                kata  : word.toLowerCase()
+            }
+            $.ajax({
+                url: "stopword",
+                method:"POST",
+                data: data,
+                cache:false,
+                success:function(resp){
+                if(resp['status']){
+                    message('info',resp['message'])
+                    $('.stopWord_start').val(0)
+                    stopWord_no = 0
+                    stopWord()
+                }else{
+                    message('error',resp['message'])
+                }
+                }, error: function (status) {
+                    
+                }
+            })
+        }  
+    }
+
+    function dialogStopWord(id,word){
+        $('.menu-dialog-stopword').modal("show")
+        $('._id').val(id)
+        $('._word').val(word)
+    }
+
+    function updateStopWord(){
+        var _id = $('._id').val();
+        var word = $('._word').val();
+        if(!word){
+            message('warning','Stop-word harus diisi')
+            $('.word').focus()
+        }else{
+            const data = {
+                _id     : _id,
+                kata    : word.toLowerCase()
+            }
+            $('.stopWord_start').val(0)
+            stopWord_no = 0
+            $.ajax({
+                url: "stopword",
+                method:"PUT",
+                data: data,
+                cache:false,
+                success:function(resp){
+                if(resp['status']){
+                    message('info',resp['message'])
+                    $('.stopWord_start').val(0)
+                    stopWord_no = 0
+                    stopWord()
+                    $('.menu-dialog-stopword').modal("hide")
+                    $(".stop-word").html("")
+                }else{
+                    message('error',resp['message'])
+                }
+                }, error: function (status) {
+                    
+                }
+            })
+        }  
+    }
+
+    function deleteStopWord(){
+        var r = confirm("Hapus kata?")
+        if (r == true) {
+            var _id = $('._id').val();
+            const data = {
+                _id     : _id
+            }
+            $('.stopWord_start').val(0)
+            $('.stopWord_limit').val(stopWord_no)
+            stopWord_no = 0
+            $.ajax({
+                url: "stopword",
+                method:"DELETE",
+                data: data,
+                cache:false,
+                success:function(resp){
+                if(resp['status']){
+                    message('info',resp['message'])
+                    $('.stopWord_start').val(0)
+                    stopWord_no = 0
+                    stopWord()
+                    $(".stop-word").html("")
+                    $('.menu-dialog-stopword').modal("hide")
+                }else{
+                    message('error',resp['message'])
+                }
+                }, error: function (status) {
+                    
+                }
+            })
+        }
+    }
+
+
+    slangWord();
+    let slangWord_no = 0;
+    function slangWord(){
+        let start = $('.slangWord_start').val()
+        let limit = $('.slangWord_limit').val()
+        const data = {
+            start:  start,
+            limit:  limit
+        }
+        $.ajax({
+            url: "slangword",
+            method:"GET",
+            cache:false,
+            data: data,
+            success:function(resp){
+                if(resp['status']){
+                    $('.slangword').val("")
+                    $('.replace_slangword').val("")
+                    const data = resp['data']
+                    const count = parseInt(resp['count'])
+                    var html = ""
+                    if(start>0){
+                        html = $(".slang-word").html()
+                    }
+                    data.forEach(key => {
+                        if(slangWord_no!=0){html +=',';}
+                        html += '<button type="button" class="btn btn-link btn-sm" onclick="dialogSlangWord(&#39;'+key._id+'&#39;,&#39;'+key.kata+'&#39;,&#39;'+key.kata_ganti+'&#39;)" style="margin-right:3px;">'+key.kata+' ('+key.kata_ganti+')</button>'
+                        slangWord_no++
+                    });
+                    start = slangWord_no
+                    $('.slangWord_start').val(start)
+                    $(".slang-word").html(html)
+                    if((start>=count)){
+                        $('.slangword-loadmore').hide()
+                    }
+                }
+            }, error: function (status) {
+                
+            }
+        })
+    }
+
+    function addSlangWord(){
+        var word = $('.slangword').val();
+        var replace_word = $('.replace_slangword').val();
+        if(!word){
+            message('warning','Kata baru harus diisi')
+            $('.slangword').focus()
+        }else if(!replace_word){
+            message('warning','Makna kata harus diisi')
+            $('.replace_slangword').focus()
+        }else{
+            const data = {
+                kata  : word.toLowerCase(),
+                kata_ganti  : replace_word.toLowerCase()
+            }
+            $.ajax({
+                url: "slangword",
+                method:"POST",
+                data: data,
+                cache:false,
+                success:function(resp){
+                if(resp['status']){
+                    message('info',resp['message'])
+                    $('.slangWord_start').val(0)
+                    slangWord_no = 0
+                    slangWord()
+                }else{
+                    message('error',resp['message'])
+                }
+                }, error: function (status) {
+                    
+                }
+            })
+        }  
+    }
+
+    function dialogSlangWord(id,word,replace_word){
+        $('.menu-dialog-slangword').modal("show")
+        $('._slangword_id').val(id)
+        $('._slangword').val(word)
+        $('._slangword_old').val(word)
+        $('._replace_slangword').val(replace_word)
+    }
+
+    function updateSlangWord(){
+        var _id = $('._slangword_id').val();
+        var word_old = $('._slangword_old').val();
+        var word = $('._slangword').val();
+        var replace_word = $('._replace_slangword').val();
+        if(!word){
+            message('warning','Kata harus diisi')
+            $('._slangword').focus()
+        }else if(!replace_word){
+            message('warning','Makna kata harus diisi')
+            $('._replace_slangword').focus()
+        }else{
+            const data = {
+                _id             : _id,
+                kata_lama            : word_old.toLowerCase(),
+                kata            : word.toLowerCase(),
+                kata_ganti    : replace_word.toLowerCase()
+            }
+            $('.slangWord_start').val(0)
+            $('.slangWord_limit').val(slangWord_no)
+            slangWord_no = 0
+            $.ajax({
+                url: "slangword",
+                method:"PUT",
+                data: data,
+                cache:false,
+                success:function(resp){
+                if(resp['status']){
+                    message('info',resp['message'])
+                    $('.slangWord_start').val(0)
+                    slangWord_no = 0
+                    slangWord()
+                    $(".slang-word").html("")
+                    $('.menu-dialog-slangword').modal("hide")
+                }else{
+                    message('error',resp['message'])
+                }
+                }, error: function (status) {
+                    
+                }
+            })
+        }  
+    }
+
+    function deleteSlangWord(){
+        var r = confirm("Hapus kata?")
+        if (r == true) {
+            var _id = $('._slangword_id').val();
+            const data = {
+                _id     : _id
+            }
+            $('.slangWord_start').val(0)
+            $('.slangWord_limit').val(slangWord_no)
+            slangWord_no = 0
+            $.ajax({
+                url: "slangword",
+                method:"DELETE",
+                data: data,
+                cache:false,
+                success:function(resp){
+                if(resp['status']){
+                    message('info',resp['message'])
+                    $('.slangWord_start').val(0)
+                    slangWord_no = 0
+                    slangWord()
+                    $(".slang-word").html("")
+                    $('.menu-dialog-slangword').modal("hide")
+                }else{
+                    message('error',resp['message'])
+                }
+                }, error: function (status) {
+                    
+                }
+            })
+        }
+    }
+
+    rootWord();
+    let rootWord_no = 0;
+    function rootWord(){
+        let start = $('.rootWord_start').val()
+        let limit = $('.rootWord_limit').val()
+        const data = {
+            start:  start,
+            limit:  limit
+        }
+        $.ajax({
+            url: "rootWord",
+            method:"GET",
+            cache:false,
+            data: data,
+            success:function(resp){
+                $('.rootword').val("")
+                const data = resp['data']
+                const count = parseInt(resp['count'])
+                var html = ""
+                    if(start>0){
+                        html = $(".root-word").html()
+                    }
+                data.forEach(key => {
+                    if(rootWord_no!=0){html +=',';}
+                    html += '<button type="button" class="btn btn-link btn-sm" onclick="dialogRootWord(&#39;'+key._id+'&#39;,&#39;'+key.kata+'&#39;)" style="margin-right:3px;">'+key.kata+'</button>'
+                    rootWord_no++
+                });
+                start = rootWord_no
+                $('.rootWord_start').val(start)
+                $(".root-word").html(html)
+                if((start>=count)){
+                    $('.rootword-loadmore').hide()
+                }
+            }, error: function (status) {
+                
+            }
+        })
+    }
+
+    function addRootWord(){
+        var word = $('.rootword').val();
+        if(!word){
+            message('warning','Kata dasar harus diisi')
+            $('.rootword').focus()
+        }else{
+            const data = {
+                kata  : word.toLowerCase()
+            }
+            $.ajax({
+                url: "rootword",
+                method:"POST",
+                data: data,
+                cache:false,
+                success:function(resp){
+                if(resp['status']){
+                    message('info',resp['message'])
+                    $('.rootWord_start').val(0)
+                    rootWord_no = 0
+                    rootWord()
+                }else{
+                    message('error',resp['message'])
+                }
+                }, error: function (status) {
+                    
+                }
+            })
+        }  
+    }
+
+    function dialogRootWord(id,word){
+        $('.menu-dialog-rootword').modal("show")
+        $('._rootword_id').val(id)
+        $('._rootword').val(word)
+    }
+
+    function updateRootWord(){
+        var _id = $('._rootword_id').val();
+        var word = $('._rootword').val();
+        if(!word){
+            message('warning','Word harus diisi')
+            $('._rootword').focus()
+        }else{
+            const data = {
+                _id     : _id,
+                kata    : word.toLowerCase()
+            }
+            $('.rootWord_start').val(0)
+            $('.rootWord_limit').val(rootWord_no)
+            rootWord_no = 0
+            $.ajax({
+                url: "rootword",
+                method:"PUT",
+                data: data,
+                cache:false,
+                success:function(resp){
+                if(resp['status']){
+                    message('info',resp['message'])
+                    $('.rootWord_start').val(0)
+                    rootWord_no = 0
+                    rootWord()
+                    $(".root-word").html("")
+                    $('.menu-dialog-rootword').modal("hide")
+                }else{
+                    message('error',resp['message'])
+                }
+                }, error: function (status) {
+                    
+                }
+            })
+        }  
+    }
+
+    function deleteRootWord(){
+        var r = confirm("Hapus kata?")
+        if (r == true) {
+            var _id = $('._rootword_id').val();
+            const data = {
+                _id     : _id
+            }
+            $('.rootWord_start').val(0)
+            $('.rootWord_limit').val(rootWord_no)
+            rootWord_no = 0
+            $.ajax({
+                url: "rootword",
+                method:"DELETE",
+                data: data,
+                cache:false,
+                success:function(resp){
+                if(resp['status']){
+                    message('info',resp['message'])
+                    $('.rootWord_start').val(0)
+                    rootWord_no = 0
+                    rootWord()
+                    $(".root-word").html("")
+                    $('.menu-dialog-rootword').modal("hide")
+                }else{
+                    message('error',resp['message'])
+                }
+                }, error: function (status) {
+                    
+                }
+            })
+        }
+    }
+
+</script>
+@endsection

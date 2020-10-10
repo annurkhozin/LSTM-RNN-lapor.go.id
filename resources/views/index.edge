@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Implementasi LSTM-RNN</title>
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="author" content="annurkhozin@gmail.com">
+    {{ style('css/bootstrap.min') }}
+    {{ style('css/jquery.notify') }}
+    {{ style('css/style') }}
+    {{ style('css/pace') }}
+    {{ style('css/icofont.min') }}
+    {{ style('css/dataTables.bootstrap4.min') }}
+    {{ style('css/dropzone.min') }}
+    {{ style('css/confusion-matrix') }}
+    {{ script('js/feather.min') }}
+</head>
+
+<body class="container html">
+    @include('loading')
+</body>
+
+    {{ script('js/jquery.min') }}
+    {{ script('js/popper.min') }}
+    {{ script('js/bootstrap.min') }}
+    
+    {{ script('js/jquery.dataTables.min') }}
+    {{ script('js/dataTables.bootstrap4.min') }}
+    
+    {{ script('js/sammy.min') }}
+    {{ script('js/jquery.notify.min') }}
+    {{ script('js/main') }}
+    {{ script('js/json-excel.min') }}
+    {{ script('js/pace.min') }}
+    {{ script('js/TweenMax.min') }}
+    {{ script('js/jscharting') }}
+    {{ script('js/dropzone.min') }}
+    {{ script('js/d3.min') }}
+    {{ script('js/confusion-matrix') }}
+    
+    {{ script('js/tfjs') }}
+    {{ script('js/stemmer') }}
+    {{ script('js/preprocessing') }}
+    {{ script('js/klasifikasi') }}
+    {{ script('js/chart-loader') }}
+    
+    <script>
+        
+    let scraping_status = 0
+    let kFolfIndex = 0;
+    google.charts.load('current', {packages: ['corechart', 'line']});
+    function message(type, mesage){       
+        notify({
+            type: type, //alert | success | error | warning | info
+            title: "Pesan",
+            message: mesage,
+            position: {
+                x: "right", //right | left | center
+                y: "top" //top | bottom | center
+            },
+            // icon: '<img src="images/paper_plane.png" />', //<i>
+            size: "normal", //normal | full | small
+            overlay: false, //true | false
+            closeBtn: true, //true | false
+            overflowHide: false, //true | false
+            spacing: 20, //number px
+            theme: "default", //default | dark-theme
+            autoHide: true, //true | false
+            delay: 2500, //number ms
+            onShow: null, //function
+            onClick: null, //function
+            onHide: null, //function
+            template: '<div class="notify"><div class="notify-text"></div></div>'
+        });
+    }
+
+    
+    </script>
+</html>

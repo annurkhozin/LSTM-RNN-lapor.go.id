@@ -1,0 +1,1182 @@
+@layout('template')
+
+@section('content')
+<style>
+  .hidden_div .dataTables_length{
+    display: none;
+  }
+  .hidden_div .dataTables_filter{
+    display: none;
+  }
+  .hidden_div .dataTables_info{
+    display: none;
+  }
+  td {
+    vertical-align: top;
+  }
+</style>
+<div class="box-content">
+  <div class="text-center btn-start">
+    <div class="form-row row text-left justify-content-md-center">
+      <div class="alert col-md-8 mb-3 alert-warning" role="alert">
+        <i>Hyperparameter</i> pengujian menggunakan <i>Long short-term memory (LSTM), Recurrent Neural Network</i>.
+      </div>
+    </div>
+    <div class="form-row row text-left justify-content-md-center">
+      <div class="col-md-4 mb-3">
+        <label>Embedding Dimension</label>
+        <input type="number" class="form-control val_embedding_dim" value="50" placeholder="50" value="Mark" required>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>K-Fold Cross-Validation</label>
+        <input type="number" class="form-control val_kfold" value="10" placeholder="10" value="Otto" required>
+      </div>
+    </div>
+    <div class="form-row row text-left justify-content-md-center">
+      <div class="col-md-4 mb-3">
+        <label>Optimizer</label>
+        <select class="custom-select val_optimizer" required>
+          <option value="1">Adam</option>
+          <option value="2">SGD (Stochastic Gradient Descent)</option>
+          <option value="3">RMSProp</option>
+        </select>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Learning rate</label>
+        <input type="number" step="0.001" class="form-control val_learning_rate" value="0.05" required>
+      </div>
+    </div>  
+    <div class="form-row row text-left justify-content-md-center">
+      <div class="col-md-4 mb-3">
+        <label>Batch size</label>
+        <input type="number" class="form-control val_batch_size" value="512" required>
+      </div>
+      <div class="col-md-4 mb-3">
+        <label>Epoch</label>
+        <input type="number" class="form-control val_epoch" value="10" required>
+      </div>
+    </div>
+    <button class="btn-01" onclick="startProcess()"><i class="icofont-play-alt-2 icofont-1x"></i> Mulai </button>
+  </div>
+  <div class="breadcrumbs msg-tooltip" data-toggle="tooltip" data-placement="left" title="Klik, untuk melihat hasil dari setiap tahap.">
+    <a class="breadcrumb__step step-1 t-dataset_div" href="javascript:void(0)" onclick="showProcess('dataset_div')">Dataset</a>
+    <a class="breadcrumb__step step-2 t-preprocessing_div" href="javascript:void(0)" onclick="showProcess('preprocessing_div')">Preprocessing</a>
+    <a class="breadcrumb__step step-3 t-wordsequence_div" href="javascript:void(0)" onclick="showProcess('wordsequence_div')">Sequence of Integer</a>
+    <a class="breadcrumb__step step-4 t-splitdataset_div" href="javascript:void(0)" onclick="showProcess('splitdataset_div')">Split dataset</a>
+    <a class="breadcrumb__step step-5 t-lstm_div" href="javascript:void(0)" onclick="showProcess('lstm_div')">LSTM</a>
+    <a class="breadcrumb__step step-6 t-testing_div" href="javascript:void(0)" onclick="showProcess('testing_div')">Pengujian</a>
+    <a class="breadcrumb__step step-7 t-summary_div" href="javascript:void(0)" onclick="showProcess('summary_div')">Ringkasan</a>
+    <a class="breadcrumb__step breadcrumb__step--active loading-process t-current" href="javascript:void(0)" onclick="showProcess('current')"><div class="spinner-border spinner-border-sm" role="status"><span class="sr-only">Loading...</span></div> <span class="process_name">Proses</span></a>
+  </div>
+</div>
+
+<div class="box-content col-md-12" style="margin-top:30px;">
+  <div class="div-process dataset_div">
+    <table style="font-size:14px;" class="table table-striped table-bordered dataset_table" style="width:100%">
+      <thead>
+          <tr>
+              <th style="width: 1px;">No</th>
+              <th>Teks</th>
+          </tr>
+      </thead>
+    </table>
+  </div>
+
+  <div class="div-process preprocessing_div">
+    <nav>
+        <div class="nav nav-tabs nav-fill" role="tablist">
+            <a class="nav-item nav-link " data-toggle="tab" href=".tab-casefolding" role="tab" aria-selected="false">1. <i>Case Folding</i></a>
+            <a class="nav-item nav-link" data-toggle="tab" href=".tab-tokenizing" role="tab" aria-selected="false">2. <i>Tokenizing</i></a>
+            <a class="nav-item nav-link" data-toggle="tab" href=".tab-filtering" role="tab" aria-selected="false">3. <i>Filtering</i></a>
+            <a class="nav-item nav-link" data-toggle="tab" href=".tab-stemming" role="tab" aria-selected="false">4. <i>Stemming</i></a>
+        </div>
+    </nav>
+    <div class="tab-content">
+        <div class="tab-pane fade tab-casefolding" role="tabpanel">
+            <div class="card border-light">
+                <div class="card-body">
+                  <div class="alert alert-warning" role="alert">
+                    <i class="icofont-info-circle"></i> <i>Case folding</i> 
+                    merupakan proses menyamakan <i>case</i> karakter pada teks.
+                  </div>
+                  <table style="font-size:14px;" class="table table-striped table-bordered casefolding_table" style="width:100%">
+                    <thead>
+                        <tr>
+                          <th style="width: 1px;">No</th>
+                          <th>Teks</th>
+                        </tr>
+                    </thead>
+                </table>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade tab-tokenizing" role="tabpanel">
+            <div class="card border-light">
+                <div class="card-body">
+                  <div class="alert alert-warning" role="alert">
+                    <i class="icofont-info-circle"></i> <i>Tokenizing</i> 
+                    merupakan proses pemisahan dan pemotongan kalimat menjadi setiap kata.
+                  </div>
+                  <table style="font-size:14px;" class="table table-striped table-bordered tokenizing_table" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th style="width: 1px;">No</th>
+                            <th>Teks</th>
+                        </tr>
+                    </thead>
+                </table>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade tab-filtering" role="tabpanel">
+          <div class="card border-light">
+              <div class="card-body">
+                <div class="alert alert-warning" role="alert">
+                  <i class="icofont-info-circle"></i> <i>Filtering</i> 
+                  merupakan proses membuang atau menghapus kata-kata serta tanda-tanda yang tidak bermakna secara signifikan.
+                </div>
+                <table style="font-size:14px;" class="table table-striped table-bordered filtering_table" style="width:100%">
+                  <thead>
+                      <tr>
+                          <th style="width: 1px;">No</th>
+                          <th>Teks</th>
+                      </tr>
+                  </thead>
+              </table>
+              </div>
+          </div>
+        </div>       
+        <div class="tab-pane fade tab-stemming" role="tabpanel">
+          <div class="card border-light">
+              <div class="card-body">
+                <div class="alert alert-warning" role="alert">
+                  <i class="icofont-info-circle"></i> <i>Stemming</i> 
+                  merupakan proses pemetaan dan penguraian bentuk dari suatu kata menjadi kata dasar.
+                </div>
+                <table style="font-size:14px;" class="table table-striped table-bordered stemming_table" style="width:100%">
+                  <thead>
+                      <tr>
+                          <th style="width: 1px;">No</th>
+                          <th>Teks</th>
+                      </tr>
+                  </thead>
+              </table>
+              </div>
+          </div>
+        </div>
+    </div>
+  </div>
+  
+  <div class="div-process splitdataset_div">
+    <div class="alert alert-warning" role="alert">
+      <i class="icofont-info-circle"></i>
+      Pembagian <i>dataset</i> secara acak untuk iterasi <i>K-Fold Cross Validation</i>.
+    </div>
+    <table style="font-size:14px;" class="table table-striped table-bordered splitdataset_table" style="width:100%">
+      <thead>
+          <tr>
+              <th style="width: 3px;">Iterasi</th>
+              <th>Data Training (nomor pada dataset)</th>
+              <th>Data Testing (nomor pada dataset)</th>
+          </tr>
+      </thead>
+    </table>
+  </div>
+
+  <div class="div-process wordsequence_div">
+    <nav>
+      <div class="nav nav-tabs nav-fill" role="tablist">
+          <a class="nav-item nav-link " data-toggle="tab" href=".tab-wordinteger" role="tab" aria-selected="false">Kata</a>
+          <a class="nav-item nav-link" data-toggle="tab" href=".tab-kelasinteger" role="tab" aria-selected="false">Kelas</a>
+          <a class="nav-item nav-link" data-toggle="tab" href=".tab-datasetsequence" role="tab" aria-selected="false"><i>Dataset</i></a>
+      </div>
+    </nav>
+    <div class="tab-content">
+        <div class="tab-pane fade tab-wordinteger" role="tabpanel">
+            <div class="card border-light">
+              <div class="card-body">
+                <div class="alert alert-warning" role="alert">
+                  <i class="icofont-info-circle"></i>
+                  Pengubahan kata ke bentuk angka berdasarkan tingkat kemunculan kata pada dataset.
+                </div>
+                <table style="font-size:14px;" class="table table-striped table-bordered wordinteger_table" style="width:100%">
+                  <thead>
+                    <tr>
+                      <th>No</th>
+                      <th>Kata</th>
+                      <th>Frekuensi</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+            </div>
+        </div>
+        <div class="tab-pane fade tab-kelasinteger" role="tabpanel">
+            <div class="card border-light">
+              <div class="card-body">
+                <div class="alert alert-warning" role="alert">
+                  <i class="icofont-info-circle"></i>
+                  Pengubahan kelas ke bentuk angka berdasarkan jumlah pada dataset.
+                </div>
+                <table style="font-size:14px;" class="table table-striped table-bordered kelasinteger_table" style="width:100%">
+                  <thead>
+                    <tr>
+                      <th>No</th>
+                      <th>Kelas</th>
+                      <th>Frekuensi</th>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+            </div>
+        </div>
+        <div class="tab-pane fade tab-datasetsequence" role="tabpanel">
+          <div class="card border-light">
+              <div class="card-body">
+                <div class="alert alert-warning" role="alert">
+                  <i class="icofont-info-circle"></i>
+                  Pengubahan <i>dataset</i> menjadi sebuah bentuk angka yang dapat mewakili setiap kata.
+                </div>
+                <table style="font-size:14px;" class="table table-striped table-bordered datasetsequence_table" style="width:100%">
+                  <thead>
+                      <tr>
+                          <th style="width: 1px;">No</th>
+                          <th>Teks</th>
+                      </tr>
+                  </thead>
+              </table>
+              </div>
+          </div>
+        </div>
+    </div>
+  </div>
+
+  <div class="div-process lstm_div hidden_div">
+    <table style="width:100%" class="text-center table lstmFoldtable">
+      <thead>
+        <tr>
+          <th style="width:1px;">Iterasi</th>
+          <td>&nbsp;</td>
+          <td style="width:70%" align="center" valign="top">&nbsp;</td>
+        </tr>
+      <thead>
+    </table>
+  </div>
+
+  <div class="div-process hidden_div testing_div">
+    <nav>
+      <div class="nav nav-tabs" role="tablist">
+          <a class="nav-item nav-link active " data-toggle="tab" href=".tab-testing-table" role="tab" aria-selected="false">Data Pengujian</a>
+          <a class="nav-item nav-link" data-toggle="tab" href=".tab-confusion-matrix" role="tab" aria-selected="false"><i>f-Measure</i></a>
+      </div>
+    </nav>
+    <div class="tab-content">
+      <div class="tab-pane fade active show tab-testing-table" role="tabpanel">
+          <div class="card border-light">
+              <div class="card-body">
+                <table class="table text-center testingDataFoldtable">
+                  <thead>
+                    <tr>
+                      <th style="width:1px;">Iterasi</th>
+                      <td>&nbsp;</td>
+                    </tr>
+                  </thead>
+                </table>
+              </div>
+          </div>
+      </div>
+      <div class="tab-pane fade tab-confusion-matrix" role="tabpanel">
+        <div class="card border-light">
+            <div class="card-body hidden_div">
+              <table class="table text-center testingFoldtable">
+                <thead>
+                  <tr>
+                    <th style="width:1px;">Iterasi</th>
+                    <td>Confusion Matrix</td>
+                    <td>&nbsp;</td>
+                    <td>&nbsp;</td>
+                  </tr>
+                </thead>
+              </table>
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <table class="tbl-download"></table>
+  <div class="div-process hidden_div summary_div">
+    <div id="summaryBarChart"></div>
+    <table style="font-size:14px;" class="table text-center table-bordered summary_table" style="width:100%">
+      <thead>
+        <tr>
+          <th style="width:1px;">Iterasi</th>
+          <th>Avg Precision</th>
+          <th>Avg Recall</th>
+          <th>Avg F-Measure</th>
+        </tr>
+      </thead>
+      <tfoot>
+        <tr>
+          <th style="width:1px;">AVG</th>
+          <th class="avg_precision">0</th>
+          <th class="avg_recall">0</th>
+          <th class="avg_fmeasure">0</th>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+<script>
+  google.charts.load('current', {packages: ['corechart', 'line','bar']});
+  var stemmer = new Stemmer();
+  var preprocessing = new Preprocessing();
+  var klasifikasi = new Klasifikasi();
+
+  let delay = 0;
+  var preinsert = 100
+  let N_kflod = 10; // ==> jumlah k fold cross-validation
+  var maks_kamus = 5000;
+  var token_integer = [0];
+  let val_embedding_dim, val_learning_rate, val_epoch, val_optimizer, val_batch_size;
+  var process, dataset, dataset_origin, kelas_sequence, stopwords = [], train_table,
+    slangwords, rootwords = [], kamus = [], data_testing, data_testing, historyfMeasure = [];
+  var array_words, word_sequence;
+  var kfold_dataset_training = [];
+  var kfold_dataset_testing = [];
+  
+
+  var dataset_table = $('.dataset_table').DataTable({"ordering": false})
+  var casefolding_table = $('.casefolding_table').DataTable({"ordering": false})
+  var tokenizing_table = $('.tokenizing_table').DataTable({"ordering": false})
+  var stemming_table = $('.stemming_table').DataTable({"ordering": false})
+  var filtering_table = $('.filtering_table').DataTable({"ordering": false})
+  var wordinteger_table = $('.wordinteger_table').DataTable({"ordering": false})
+  var kelasinteger_table = $('.kelasinteger_table').DataTable({"ordering": false})
+  var datasetsequence_table = $('.datasetsequence_table').DataTable({"ordering": false})
+  var splitdataset_table = $('.splitdataset_table').DataTable({"ordering": false})
+  var lstmFoldtable = $('.lstmFoldtable').DataTable({"ordering": false})
+  var testingDataFoldtable = $('.testingDataFoldtable').DataTable({"ordering": false})
+  var testingKFoldtable = $('.testingFoldtable').DataTable({"ordering": false})
+  var summary_table = $('.summary_table').DataTable({"ordering": false})
+  
+  $('.breadcrumbs').hide()
+  $('.div-process').hide()
+  $('.breadcrumb__step').hide()
+  getDictionary()
+
+  function getDictionary() {
+    $.ajax({
+      url: "kamus",
+      method: "post",
+      cache: false,
+      success: function (resp) {
+        var resp_stopwords = resp['stopwords']
+        resp_stopwords.forEach(key => {
+          stopwords.push(key.kata)
+        });
+        var resp_rootwords = resp['rootwords']
+        resp_rootwords.forEach(key => {
+          rootwords.push(key.kata)
+        });
+        slangwords = resp['slangwords']
+      }
+    })
+  }
+
+  function showProcess(div) {
+    $('.div-process').hide()
+    $('.breadcrumb__step').removeClass('breadcrumb__step--active');
+    $('.t-'+div).addClass('breadcrumb__step--active');
+    if (div == "current") {
+      $('.' + process).show()
+    } else {
+      $('.' + div).show()
+    }
+  }
+
+  function startProcess() {
+    $('.btn-start').hide();
+    $('.breadcrumbs').show();
+    val_embedding_dim = $('.val_embedding_dim').val();
+    val_learning_rate = $('.val_learning_rate').val();
+    val_epoch = $('.val_epoch').val();
+    val_optimizer = $('.val_optimizer').val();
+    val_batch_size = $('.val_batch_size').val();
+    N_kflod = $('.val_kfold').val();
+    getDataset();
+  }
+
+  function messageProcess(message) {
+    $('.loading-process').show()
+    $(".process_name").html(message)
+  }
+
+  function showTab(tab){
+    $('a[href="' + tab + '"]').click();
+  }
+
+  function getDataset() {
+    process = "dataset_div"
+    messageProcess("Memuat dataset")
+    $('.dataset_div').show()
+    setTimeout(function () {
+      $.ajax({
+        url: "allDataset",
+        method: "GET",
+        cache: false,
+        success: function (resp) {
+          dataset = resp['data']
+          dataset_origin = dataset
+          let count_dataset = dataset.length
+          if(count_dataset>0){
+            let n = 1
+            var insert = [];
+            dataset.forEach(key => {
+              setTimeout(function () {
+                var content = "Kelas : <b>" + key.kelas + "</b><br>" + key.teks
+
+                insert.push([n, content])
+                if(insert.length==preinsert){
+                  dataset_table.rows.add(insert).draw();
+                  insert = []
+                }
+
+                n++
+                if ((count_dataset+1) == n) {
+                  $('.step-1').show()
+                  $('.dataset_div').hide()
+                  caseFolding_process()
+                }
+              }, delay)
+            });
+          }else{
+            message("warning","Dataset kosong, silahkan menambahkan dataset terlebih dahulu")
+            setTimeout(
+              "sammyApp.refresh()"
+              ,2000);
+          }
+        }
+      })
+    }, delay)
+  }
+
+  function caseFolding_process() {
+    process = "preprocessing_div"
+    $('.preprocessing_div').show()
+    messageProcess("Case folding")
+    showTab(".tab-casefolding")
+    setTimeout(function () {
+      var new_dataset = []
+      let count_dataset = dataset.length
+      let n = 1
+      var insert = [];
+      dataset.forEach(key => {
+        setTimeout(function () {
+          var teks = preprocessing.caseFolding(key.teks)
+          var kelas = preprocessing.caseFolding(key.kelas)
+          var content = "Kelas : <b>" + kelas + "</b><br>" + teks
+          
+          insert.push([n, content])
+          if(insert.length==preinsert){
+            casefolding_table.rows.add(insert).draw();
+            insert = []
+          }
+
+          new_dataset.push({
+            teks: teks,
+            kelas: kelas
+          })
+          n++
+          if ((count_dataset+1) == n) {
+            casefolding_table.rows.add(insert).draw();
+            dataset = new_dataset
+            tokenizing_process()
+          }
+        }, delay)
+      });
+
+    }, delay)
+  }
+
+  function tokenizing_process() {
+    process = "preprocessing_div"
+    $('.preprocessing_div').show()
+    messageProcess("Tokenizing")
+    showTab(".tab-tokenizing")
+    setTimeout(function () {
+      var new_dataset = []
+      let count_dataset = dataset.length
+      let n = 1
+      var insert = [];
+      dataset.forEach(key => {
+        setTimeout(function () {
+          var teks = preprocessing.tokenizing(key.teks)
+          var kelas = key.kelas
+          var text_view = teks.map(function(key){ return " '"+key+"'"; });
+          var content = "Kelas : <b>" + kelas + "</b><br>" + text_view;
+          
+          insert.push([n, content])
+          if(insert.length==preinsert){
+            tokenizing_table.rows.add(insert).draw();
+            insert = []
+          }
+
+          new_dataset.push({
+            teks: teks,
+            kelas: kelas
+          })
+          n++
+          if ((count_dataset+1) == n) {
+            tokenizing_table.rows.add(insert).draw();
+            dataset = new_dataset
+            filtering_process()
+          }
+        }, delay)
+      });
+
+    }, delay)
+  }
+
+  function filtering_process() {
+    process = "preprocessing_div"
+    $('.preprocessing_div').show()
+    messageProcess("Filtering")
+    showTab(".tab-filtering")
+    setTimeout(function () {
+      var slangword = []
+      var kata_ganti = []
+      slangwords.forEach(key => {
+        slangword.push(key.kata)
+        kata_ganti.push(key.kata_ganti)
+      });
+
+      var new_dataset = []
+      let count_dataset = dataset.length
+      let n = 1
+      var insert = [];
+      dataset.forEach(key => {
+        setTimeout(function () {
+          var teks = preprocessing.filteringWord(slangword,kata_ganti, stopwords, key.teks)
+          var kelas = key.kelas
+          var text_view = teks.map(function(key){ return " '"+key+"'"; });
+          var content = "Kelas : <b>" + kelas + "</b><br>" + text_view
+          
+          insert.push([n, content])
+          if(insert.length==preinsert){
+            filtering_table.rows.add(insert).draw();
+            insert = []
+          }
+
+          new_dataset.push({
+            teks: teks,
+            kelas: kelas
+          })
+          n++
+          if ((count_dataset+1) == n) {
+            filtering_table.rows.add(insert).draw();
+            dataset = new_dataset
+            stemming_process()
+          }
+        }, delay)
+      });
+    }, delay)
+  }
+
+  function stemming_process() {
+    process = "preprocessing_div"
+    $('.preprocessing_div').show()
+    messageProcess("Stemming ")
+    showTab(".tab-stemming")
+    setTimeout(function () {
+      var new_dataset = []
+      let count_dataset = dataset.length
+      let n = 1
+      var insert = [];
+      dataset.forEach(key => {
+        setTimeout(function () {
+          var teks = preprocessing.stemming(rootwords, key.teks)
+          var kelas = key.kelas
+          var text_view = teks.map(function(key){ return " '"+key+"'"; });
+          var content = "Kelas : <b>" + kelas + "</b><br>" + text_view;
+          
+          insert.push([n, content])
+          if(insert.length==preinsert){
+            stemming_table.rows.add(insert).draw();
+            insert = []
+          }
+
+          new_dataset.push({
+            teks: teks,
+            kelas: kelas
+          })
+          n++
+          if ((count_dataset+1) == n) {
+            stemming_table.rows.add(insert).draw();
+            dataset = new_dataset
+            $('.step-2').show()
+            $('.preprocessing_div').hide()
+            wordSequence_process()
+          }
+        }, delay)
+      })
+
+    }, delay)
+  }
+ 
+  function wordSequence_process() {
+    process = "wordsequence_div"
+    $('.wordsequence_div').show()
+    messageProcess("Word sequence of integer")
+    showTab('.tab-wordinteger');
+    klasifikasi.preDatasetSequence(dataset)
+  }
+
+  function generateSequenceTable(array_word,tokens,word_freq){
+    array_words = array_word
+    word_sequence = tokens
+    let i = 0
+    var insert = []
+    tokens.forEach(element => {
+      setTimeout(()=>{
+        insert.push([(i+1), tokens[i], word_freq[i]])
+        
+        if(insert.length==(preinsert*3)){
+          wordinteger_table.rows.add(insert).draw();
+          insert = []
+        }
+        i++
+        if(i==tokens.length){
+          wordinteger_table.rows.add(insert).draw();
+          showTab('.tab-kelasinteger');
+          klasifikasi.kelasGroup();
+        }
+      },delay)
+    });
+  }
+  
+  function generateSequenceKelasTable(array_kelas,kelas,kelas_freq){
+    kelas_sequence = kelas
+    kelas_frequency = kelas_freq
+    let i = 0
+    var insert = []
+    kelas.forEach(element => {
+      setTimeout(()=>{
+        insert.push([(i+1), kelas[i], kelas_freq[i]])
+        if(insert.length==preinsert){
+          kelasinteger_table.rows.add(insert).draw();
+          insert = []
+        }
+        i++
+        if(i==kelas.length){
+          kelasinteger_table.rows.add(insert).draw();
+          generateDatasetSequenceTable()
+        }
+      },delay+500)
+    });
+  }
+
+  function generateDatasetSequenceTable(){
+    const new_dataset = []
+    showTab('.tab-datasetsequence')
+    const data = {
+      kelas: kelas_sequence.toString(),
+      token: word_sequence.toString(),
+      learning_rate: val_learning_rate,
+      embedding_dim: val_embedding_dim,
+      epoch: val_epoch,
+      optimizer: val_optimizer,
+      batch_size: val_batch_size
+    }
+     $.ajax({
+      url: "send-token-kelas",
+      method: "post",
+      data: data,
+      cache: false,
+      success:(resp)=>{
+       
+      },
+      error:()=>{
+        message('error','Terputus dengan server, silahkan muat ulang halaman');
+      }
+    })
+
+
+    length = dataset.length
+    let n = 1
+    var insert = []
+    dataset.forEach(key => {
+      setTimeout(function(){
+          const element_text = key.teks
+          var element_kelas = key.kelas
+          let kelas_integer = kelas_sequence.indexOf(element_kelas)+1
+          
+          var text_i = []
+          for (let x=0; x<element_text.length; x++) {
+            let word_integer = word_sequence.indexOf(element_text[x])+1
+            if(word_integer!=0){
+              text_i.push(word_integer)
+            }
+          }
+          if(text_i.length>0){
+            var kurang = dataset_max_length - text_i.length
+            var text_0 = []
+            for (let x=0; x<kurang; x++) {
+                text_0.push(0)
+            }
+            var concat_text = text_0.concat(text_i)
+            text_i = concat_text
+            new_dataset.push({
+                kelas: kelas_integer,
+                teks: text_i
+            })
+            var teks_view = text_i.map(function(key){ return " "+key; });
+            var konten = "Kelas : <b>" + kelas_integer + "</b><br>" + teks_view;
+            
+            insert.push([n, konten])
+            if(insert.length==preinsert){
+              datasetsequence_table.rows.add(insert).draw();
+              insert = []
+            }
+          }
+          n++
+          if((length+1)==n){
+            datasetsequence_table.rows.add(insert).draw();
+            dataset = new_dataset  
+            $('.step-3').show()
+            $('.wordsequence_div').hide()
+            splitDataset_process()
+          }
+      },delay)
+    });
+  }
+
+  function splitDataset_process() {
+    messageProcess("Split Dataset")
+    process = "splitdataset_div"
+    $('.splitdataset_div').show()
+    setTimeout(function () {
+      var splitKFlod = klasifikasi.splitDataset(dataset, N_kflod)
+
+      let i = 0
+      var insert = []
+      let splitKFlod_length = splitKFlod.length
+      splitKFlod.forEach(key => {
+          setTimeout(function () {
+            var int_dataset_training = [];
+            var int_dataset_testing = [];
+            for (let x = 0; x < key.length; x++) {
+              var concat0 = int_dataset_training.concat(key[x][0])
+              int_dataset_training = concat0
+              var concat1 = int_dataset_testing.concat(key[x][1])
+              int_dataset_testing = concat1         
+            }
+            kfold_dataset_training.push(int_dataset_training)
+            kfold_dataset_testing.push(int_dataset_testing)
+            var training_view = int_dataset_training.map(function(int){ return " "+(int+1); });
+            var testing_view = int_dataset_testing.map(function(int){ return " "+(int+1); });
+            
+            insert.push([(i+1), training_view, testing_view])
+            if(insert.length==preinsert){
+              splitdataset_table.rows.add(insert).draw();
+              insert = []
+            }
+
+            i++
+            if(i==splitKFlod_length){
+              splitdataset_table.rows.add(insert).draw();
+              $('.step-4').show()
+              $('.splitdataset_div').hide()
+              lstmprocess()
+            }
+        }, delay)
+      });
+    }, delay)
+  }
+
+  function lstmprocess() {
+    messageProcess("LSTM ( iterasi ke-"+(kFolfIndex+1)+" )");
+    process = "lstm_div";
+    $('.lstm_div').show();
+    cell2 = '<span class="download'+(kFolfIndex+1)+'"></span><table style="font-size:14px;" class="table table-striped table-bordered lstmKFoldtable_i'+kFolfIndex+'" style="width:100%">'+
+                        '<thead><tr>'+
+                          '<td>Epoch</td>'+
+                          '<td>Acc</td>'+
+                          '<td>Loss</td>'+
+                        '</tr></thead>'+
+                      '</table>';
+    cell3 = '<div id="acc_chart_div'+kFolfIndex+'"></div>';
+    lstmFoldtable.row.add([(kFolfIndex+1), cell2, cell3]).draw();
+    train_table = $('.lstmKFoldtable_i'+kFolfIndex).DataTable({"lengthMenu": [5, 10]})
+
+
+    var prepare_data_training = []
+    var prepare_kelas_training = []
+    let data_training_length = kfold_dataset_training[kFolfIndex].length
+    kfold_dataset_training[kFolfIndex].forEach(key => {
+      setTimeout(()=>{
+        data_training_length--
+        var data = dataset[key]
+        var int_kelas = data.kelas
+        var int_training = data.teks
+
+        prepare_data_training.push(int_training)
+        prepare_kelas_training.push(int_kelas)
+        if(data_training_length==0){
+
+          const data = {
+            data_training: prepare_data_training.toString(),
+            kelas_training: prepare_kelas_training.toString(),
+            training_length: dataset_max_length,
+            iterasi: (kFolfIndex+1)
+          }
+          $.ajax({
+            url: "train-lstm",
+            method: "post",
+            data: data,
+            cache: false,
+            success:(resp)=>{
+              getSummaryTraining()
+            },
+            error:()=>{
+              message('error','Terputus dengan server, silahkan muat ulang halaman');
+            }
+          })
+        }
+      },delay)
+    });
+  }
+
+  function getSummaryTraining(){
+    setTimeout(()=>{
+    $.getJSON("/get-summay-training", function(resp){
+        if(resp[1].length>0){
+
+          let epoch = 0
+          var data = []
+          train_table.clear()
+          resp[1].forEach(key => {
+            epoch++
+            data.push([epoch, key.acc, key.loss])
+            train_table.row.add([epoch, (key.acc).toFixed(3), (key.loss).toFixed(3) ]).order([[0,'desc']]).draw();
+          });
+          google.charts.setOnLoadCallback(renderAccTrainChart(data));
+        }
+        
+        if(resp[0]!='done'){
+          getSummaryTraining()
+        }else{
+          $('.step-5').show()
+          $('.lstm_div').hide()
+          testingProses()
+        }
+
+      }).fail(function() { getSummaryTraining(); });
+    },10000)
+  }
+  
+  function downloadModel(val){
+    window.location = '/model/training-model-iterasi-'+val+'.zip'
+  }
+
+  function renderAccTrainChart(series) {
+    var data = new google.visualization.DataTable();
+    data.addColumn('number', 'X');
+    data.addColumn('number', 'Acc');
+    data.addColumn('number', 'Loss');
+    data.addRows(series);
+    var options = {
+      title: 'Kurva Pembelajaran Model ke-'+(kFolfIndex+1),
+      height: 400,
+      hAxis: {
+        title: 'Epoch'
+      },
+      vAxis: {
+        title: 'Value'
+      },
+    };
+    var chart = new google.visualization.LineChart(document.getElementById('acc_chart_div'+kFolfIndex));
+    chart.draw(data, options);
+  }
+
+  function testingProses(){
+    messageProcess("Pengujian Model ( iterasi ke-"+(kFolfIndex+1)+" )");
+    process = "testing_div";
+    $('.testing_div').show();
+
+    cellData = '<table style="font-size:14px;" class="table text-left table-bordered testingDataKFoldtable_i'+kFolfIndex+'" style="width:100%">'+
+                        '<thead><tr>'+
+                          '<td class="text-center" style="width:1px;">No</td>'+
+                          '<td class="text-center">Hasil Pengujian</td>'+
+                        '</tr></thead>'+
+                      '</table>';
+    testingDataFoldtable.row.add([(kFolfIndex+1), cellData]).draw();
+
+    cell1 = '<div id="conMatrix'+kFolfIndex+'"></div>';
+    cell2 = '<div id="legend'+kFolfIndex+'"></div>';
+    cell3 = '<table style="font-size:14px;" class="table table-bordered testingKFoldtable_i'+kFolfIndex+'" style="width:100%">'+
+                        '<thead><tr>'+
+                          '<td>Kelas</td>'+
+                          '<td>Precision</td>'+
+                          '<td>Recall</td>'+
+                          '<td>F-Measure</td>'+
+                        '</tr></thead>'+
+                      '</table>';
+    testingKFoldtable.row.add([(kFolfIndex+1), cell1, cell2, cell3]).draw();
+
+    let data_testing_length = kfold_dataset_testing[kFolfIndex].length
+    const prepare_data_testing = []
+    kfold_dataset_testing[kFolfIndex].forEach(i => {
+      setTimeout(()=>{
+        data_testing_length--
+        prepare_data_testing.push(dataset[i].teks)
+        if(data_testing_length==0){
+          const data = {
+            data_testing: prepare_data_testing.toString(),
+            max_length: dataset_max_length
+          }
+          $.ajax({
+            url: "pengujian-model",
+            method: "post",
+            data: data,
+            cache: false,
+            success:(resp)=>{
+              var testing_table = $('.testingDataKFoldtable_i'+kFolfIndex).DataTable({"lengthMenu": [5, 10]})
+              let sesuai = 0
+              let tidakSesuai = 0
+              let x = 0;
+              var array_actual = []
+              var array_prediksi = []
+              var exportData = []
+              kfold_dataset_testing[kFolfIndex].forEach(i => {
+                setTimeout(()=>{
+                  var prediksi = resp[x];
+                  var isi_laporan = dataset_origin[i].teks;
+                  var kelas = preprocessing.caseFolding(dataset_origin[i].kelas);
+                  let kelasIndex = prediksi.indexOf(Math.max(...prediksi));
+                  var kelas_prediksi = kelas_sequence[kelasIndex]
+                  var kelas_actual = kelas_sequence.indexOf(kelas)
+                  array_prediksi.push((kelasIndex+1))
+                  array_actual.push((kelas_actual+1))
+                  // if(kelas_prediksi==kelas){
+                  //   sesuai++
+                  // }else{
+                  //   tidakSesuai++
+                  // }
+                  var datas = {
+                    no: (x+1),
+                    kelas_target: kelas.toUpperCase(),
+                    kelas_prediksi: kelas_prediksi.toUpperCase(),
+                    nilai_prediksi: prediksi.toString(),
+                    isi_laporan: isi_laporan
+                  }
+
+                  exportData.push(datas)
+
+                  var html = 'Kelas Target : '+kelas.toUpperCase()
+                  html += '<br>Kelas Prediksi : '+kelas_prediksi.toUpperCase()
+                  html += '<br>Nilai Prediksi : '+prediksi.map(function(val){ return " "+val; });
+                  html += '<br><br>Isi Laporan :<br>'
+                  html += '<p class="text-justify">'+isi_laporan+'</p>'
+                  testing_table.row.add([(x+1),html]).draw();
+                  x++
+
+                  if(x==resp.length){
+                    // console.log([array_actual,array_prediksi])
+                    jsonToExcel(exportData,"Iterasi K-Fold ke "+(kFolfIndex+1))
+                    var matrix = convertToMatrix(array_actual,array_prediksi)
+                    f1Scrore(matrix)
+                    // console.log('sesuai = '+sesuai)
+                    // console.log('TIDAK sesuai = '+tidakSesuai)
+                  }
+                },delay)
+              });
+            },
+            error:()=>{
+              message('error','Terputus dengan server, silahkan muat ulang halaman');
+            }
+          })
+        }
+      },delay);
+    });
+  }
+  
+  function f1Scrore(confusionMatrix){
+    messageProcess("Kalkulasi f-Measure");
+    showTab(".tab-confusion-matrix")
+    var matrix = confusionMatrix[0]
+    var labels = confusionMatrix[1]
+		Matrix({
+			container : '#conMatrix'+kFolfIndex,
+			data      : matrix,
+			labels    : labels,
+            start_color : '#ffffff',
+            end_color : '#05bcf3'
+		});
+
+    var tp = [];
+    var tn = [];
+    var fp = [];
+    var fn = [];
+    for (let x = 0; x < matrix.length; x++) {
+        let fpSum = 0
+        let fnSum = 0
+        for (let y = 0; y < matrix[x].length; y++) {
+          if(x==y){
+            tp.push(matrix[x][y])
+          }else{
+            fpSum += matrix[y][x]
+            fnSum += matrix[x][y]
+          }
+        }
+        fp.push(fpSum)
+        fn.push(fnSum)
+    }
+
+    var precision = [] // var precision = tp/(tp+fp)
+    var recall = [] // var recall = tp/(tp+fn)
+    var fMeasure = [] // var fMeasure = 2 * (1/(1/(precision)+(1/recall)))
+    
+    for (let i = 0; i < tp.length; i++) {
+      precision.push( tp[i]/(tp[i]+fp[i]))
+      recall.push(tp[i]/(tp[i]+fn[i]))
+      fMeasure.push(2 * (1/(1/(precision[i])+(1/recall[i]))))
+    }
+
+    var table = $('.testingKFoldtable_i'+kFolfIndex).DataTable({"lengthMenu": [5, 10]});
+    for (let i = 0; i < precision.length; i++) {
+      precision[i] = precision[i] ? precision[i] : 0;
+      recall[i] = recall[i] ? recall[i] : 0;
+      fMeasure[i] = fMeasure[i] ? fMeasure[i] : 0;
+      table.row.add([(i+1), toPercen(precision[i]),toPercen(recall[i]),toPercen(fMeasure[i])]).draw();
+    }
+
+    var data = {
+      precision: precision,
+      recall: recall,
+      fMeasure: fMeasure
+    }
+    historyfMeasure.push(data)
+
+    kFolfIndex++
+    setTimeout(()=>{
+      $('.testing_div').hide()
+      $('.step-6').show()
+      $('.download'+kFolfIndex).html('<button type="button" class="btn btn-success btn-sm" onclick="downloadModel('+kFolfIndex+')" >Download Model ke-'+kFolfIndex+'</button>')
+      var avg = historyfMeasure[(kFolfIndex-1)].fMeasure.reduce((a, b) => a + b, 0)/fMeasure.length
+      console.log(avg)
+      if(kFolfIndex<kfold_dataset_testing.length){
+      // if(kFolfIndex==1){
+        lstmprocess()
+      }else{
+        summaryTesting()
+      }
+    },2000)
+  }
+
+  function convertToMatrix(actual, predicted, options = {}) {
+    let distinctLabels;
+    distinctLabels = new Set([...actual, ...predicted]);
+    distinctLabels = Array.from(distinctLabels);
+    distinctLabels.sort(function(a, b) {
+      return a - b;
+    });
+
+    // Create confusion matrix and fill with 0's
+    const matrix = Array.from({ length: distinctLabels.length });
+    for (let i = 0; i < matrix.length; i++) {
+      matrix[i] = new Array(matrix.length);
+      matrix[i].fill(0);
+    }
+
+    for (let i = 0; i < predicted.length; i++) {
+      const actualIdx = distinctLabels.indexOf(actual[i]);
+      const predictedIdx = distinctLabels.indexOf(predicted[i]);
+      if (actualIdx >= 0 && predictedIdx >= 0) {
+        matrix[actualIdx][predictedIdx]++;
+      }
+    }
+
+    return [matrix, distinctLabels];
+  }
+
+  function summaryTesting(){
+    messageProcess("Ringkasan");
+    process = "summary_div";
+    $('.summary_div').show();
+    var avgData = [['Text', 'Precision', 'Recall', 'F-Measure']]
+    let val_avg_precision = 0
+    let val_avg_recall = 0
+    let val_avg_fmeasure = 0
+    for (let i = 0; i < historyfMeasure.length; i++) {
+      var cell_length = historyfMeasure[i].fMeasure.length
+      let avg_prec = 0
+      for (let c = 0; c < cell_length; c++) {
+        avg_prec += historyfMeasure[i].precision[c]
+      }
+      avg_prec = avg_prec/cell_length
+      val_avg_precision += avg_prec
+
+      let avg_recall = 0
+      for (let c = 0; c < cell_length; c++) {
+        avg_recall += historyfMeasure[i].recall[c]
+      }
+      avg_recall = avg_recall/cell_length
+      val_avg_recall += avg_recall
+
+      let avg_fmeasure = 0
+      for (let c = 0; c < cell_length; c++) {
+        avg_fmeasure += historyfMeasure[i].fMeasure[c]
+      }
+      avg_fmeasure = avg_fmeasure/cell_length
+      val_avg_fmeasure += avg_fmeasure
+
+      avgData.push(['iterasi '+(i+1), toPercenFixed(avg_prec), toPercenFixed(avg_recall), toPercenFixed(avg_fmeasure)])
+      summary_table.row.add([(i+1), toPercen(avg_prec), toPercen(avg_recall), toPercen(avg_fmeasure)]).draw()
+    }
+
+    $('.avg_precision').html(toPercen(val_avg_precision/historyfMeasure.length))
+    $('.avg_recall').html(toPercen(val_avg_recall/historyfMeasure.length))
+    $('.avg_fmeasure').html(toPercen(val_avg_fmeasure/historyfMeasure.length))
+
+    google.charts.setOnLoadCallback(summaryBarChart(avgData));
+
+    $('.step-7').show()
+    showProcess('summary_div');
+    $('.loading-process').hide()
+  }
+
+  function summaryBarChart(avgData){
+    var data = google.visualization.arrayToDataTable(avgData);
+    var options = {
+      height: 400,
+      chart: {
+        title: 'Ringkasan '+historyfMeasure.length+'-Fold Cross Validation',
+      },
+      hAxis: {
+        title: 'Iterasi K-Fold'
+      },
+      vAxis: {
+        title: 'Nilai (%)'
+      },
+    };
+
+    var chart = new google.charts.Bar(document.getElementById('summaryBarChart'));
+    chart.draw(data, google.charts.Bar.convertOptions(options));
+  }
+
+  function toPercen(val){
+    val = val*100
+    if(val.toString().length>7){
+      val = val.toFixed(2)
+    }
+    return val+'%'
+  }
+
+  function toPercenFixed(val){
+    val = val*100
+    return val
+  }
+  
+</script>
+
+
+@endsection

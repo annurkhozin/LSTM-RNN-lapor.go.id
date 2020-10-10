@@ -1,0 +1,206 @@
+@layout('template')
+
+@section('content')
+<style>
+  .dropzone{
+    border: dashed;
+  }
+  .dataTables_length{
+    display: none;
+  }
+  .dataTables_filter{
+    display: none;
+  }
+  .dataTables_info{
+    display: none;
+  }
+</style>
+<div class="box-content col-md-12">
+  <div class="div-process preprocessing_div">
+    <nav>
+        <div class="nav nav-tabs" role="tablist">
+            <a class="nav-item nav-link active " data-toggle="tab" href=".tab-current-model" role="tab" aria-selected="false">Model Sekarang</a>
+            <a class="nav-item nav-link" data-toggle="tab" href=".tab-upload-model" role="tab" aria-selected="false">Upload Model</a>
+        </div>
+    </nav>
+    <div class="tab-content">
+        <div class="tab-pane fade active show tab-current-model" role="tabpanel">
+            <div class="card border-light">
+                <div class="card-body">
+                  <div class="alert alert-warning" role="alert">
+                    <i class="icofont-info-circle"></i>
+                    Ringkasan Model yang digunakan dalam proses klasifikasi pada sistem
+                  </div>
+                  <table style="width:100%">
+                    <tr>
+                      <td style="width:30%" align="center" valign="top">
+                        <table style="font-size:14px;" class="table table-striped table-bordered current_model_table">
+                          <thead>
+                            <tr>
+                              <th>Epoch</th>
+                              <th>Acc</th>
+                              <th>Loss</th>
+                            </tr>
+                          </thead>
+                        </table>
+                      </td>
+                      <td style="width:70%" align="center" valign="top"><div id="current_chart_div"></div></td>
+                    </tr>
+                  </table>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade tab-upload-model" role="tabpanel">
+            <div class="card border-light">
+                <div class="card-body">
+                  <div class="dropzone upload-model">
+                  </div>
+                  <div class="summary_div">
+                    <button class="btn-01" onclick="setAsModel()">Jadikan sebagai model Klasifikasi sistem</button>
+                    <table style="width:100%">
+                      <tr>
+                        <td style="width:30%" align="center" valign="top">
+                          <table style="font-size:14px;" class="table table-striped table-bordered summary_table">
+                            <thead>
+                              <tr>
+                                <th>Epoch</th>
+                                <th>Acc</th>
+                                <th>Loss</th>
+                              </tr>
+                            </thead>
+                          </table>
+                        </td>
+                        <td style="width:70%" align="center" valign="top"><div id="summary_chart_div"></div></td>
+                      </tr>
+                    </table>
+                  </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  
+  $('.summary_div').hide()
+  google.charts.load('current', {packages: ['corechart', 'line'], 'callback': getCurrentModel});
+  var summary_table = $('.summary_table').DataTable({"lengthMenu": [5, 10]})
+  var current_model_table = $('.current_model_table').DataTable({"lengthMenu": [5, 10]})
+  $(".upload-model").dropzone({ 
+    url: "/upload-model",
+    paramName: "file",
+    dictDefaultMessage: "Letakkan file model pembelajaran .zip di sini untuk diunggah",
+    acceptedFiles: "application/zip",
+    // maxFiles: 1,
+    init: function () {
+      // this.on("processing", function (file) {
+      //   message('info','Proses mengunggah model')
+      // });
+      
+      this.on("success", function (file, response) {
+        message('success','Memuat Kurva Performa Model')
+        $('.summary_div').show()
+        setTimeout(()=>{
+          $.getJSON("/tmp-model/training-model/summary.json", function(resp){
+            var summary = resp.metrics
+              let epoch = 0
+              var data = []
+              summary_table.clear()
+              summary.forEach(key => {
+                epoch++
+                data.push([epoch, key.acc, key.loss ])
+                summary_table.row.add([epoch, (key.acc).toFixed(3), (key.loss).toFixed(3) ]).order([[0,'desc']]).draw();
+              });
+              google.charts.setOnLoadCallback(renderSummaryModelChart(data));
+          })
+        },1000)
+      });
+      
+      this.on("error", function (file, error, xhr) {
+        message('error','Gagal mengunggah model')
+      });
+    }
+  });
+  function getCurrentModel(){
+    $.getJSON("/model/current-model/summary.json", function(resp){
+      var summary = resp.metrics
+        let epoch = 0
+        var data = []
+        summary_table.clear()
+        summary.forEach(key => {
+          epoch++
+          data.push([epoch, key.acc, key.loss])
+          current_model_table.row.add([epoch, (key.acc).toFixed(3), (key.loss).toFixed(3) ]).order([[0,'desc']]).draw();
+        });
+        google.charts.setOnLoadCallback(renderCurrenyModelChart(data));
+    })
+  }
+
+  function renderSummaryModelChart(series) {
+    var data = new google.visualization.DataTable();
+    data.addColumn('number', 'X');
+    data.addColumn('number', 'Acc');
+    data.addColumn('number', 'Loss');
+    data.addRows(series);
+    var options = {
+      title: 'Kurva Pembelajaran Model',
+      height: 400,
+      hAxis: {
+        title: 'Epoch'
+      },
+      vAxis: {
+        title: 'Value'
+      },
+    };
+    var chart = new google.visualization.LineChart(document.getElementById('summary_chart_div'));
+    chart.draw(data, options);
+  }
+
+  function renderCurrenyModelChart(series) {
+    var data = new google.visualization.DataTable();
+    data.addColumn('number', 'X');
+    data.addColumn('number', 'Acc');
+    data.addColumn('number', 'Loss');
+    data.addRows(series);
+    var options = {
+      title: 'Kurva Pembelajaran Model',
+      height: 400,
+      hAxis: {
+        title: 'Epoch'
+      },
+      vAxis: {
+        title: 'Value'
+      },
+    };
+    var chart = new google.visualization.LineChart(document.getElementById('current_chart_div'));
+    chart.draw(data, options);
+  }
+
+  function setAsModel(){
+    $.ajax({
+      url: "set-as-current-model",
+      method: "post",
+      cache: false,
+      success:(resp)=>{
+        if(resp.status){
+          message('info','Berhasil mengubah model klasifikasi sistem');
+            setTimeout(
+              "sammyApp.refresh()"
+              ,2000);
+        }
+      },
+      error:()=>{
+        message('info','Berhasil mengubah model klasifikasi sistem');
+            setTimeout(
+              "sammyApp.refresh()"
+              ,2000);
+      }
+    })
+  }
+
+  
+</script>
+
+
+@endsection

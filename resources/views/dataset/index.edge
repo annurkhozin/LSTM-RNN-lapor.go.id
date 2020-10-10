@@ -1,0 +1,67 @@
+@layout('template')
+
+@section('content')
+<div class="row">
+    <div class="col-md-12 col-xs-12">
+        <div class="alert alert-warning" role="alert">
+            <i class="icofont-info-circle"></i> <i>Dataset</i> di ambil berdasarkan laporan masyarakat pada halaman <i>scraping</i>.
+        </div>
+        <div class="box-content">
+            <table style="font-size:14px;" class="table table-striped table-bordered datatable" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Teks</th>
+                        <th>Kelas</th>
+                        <th class="text-center">Aksi</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>              
+    </div>
+</div>
+
+<script>
+    var table = $('.datatable').DataTable( {
+            "processing": false,
+            "serverSide": true,
+            "ajax": "getDataset",
+            "aoColumns": [
+                { "data": "teks" },
+                { "data": "kelas" },
+                {
+                    "mData": "_id",
+                    "mRender": function (data, type, row) {
+                        return '<div class="text-center"><a href="javascript:void(0)" class="text-danger" onclick="deleteDataset(&#39;'+data+'&#39;)"><i class="icofont-ui-delete icofont-2x"></i></a></div>'
+                    }
+                }
+            ]          
+        })
+    function reloadData(){
+        table.ajax.reload( null, false );
+    }
+    function deleteDataset(id){
+        var r = confirm("Hapus Dataset?")
+        if (r == true) {
+            const data = {
+                _id     : id
+            }
+            $.ajax({
+                url: "dataset",
+                method:"DELETE",
+                data: data,
+                cache:false,
+                success:function(resp){
+                if(resp['status']){
+                    message('info',resp['message'])
+                    reloadData()
+                }else{
+                    message('error',resp['message'])
+                }
+                }, error: function (status) {
+                    
+                }
+            })
+        }
+    }
+</script>
+@endsection

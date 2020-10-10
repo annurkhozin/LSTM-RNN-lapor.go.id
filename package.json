@@ -1,0 +1,48 @@
+{
+  "name": "lstm-clasification-app",
+  "version": "4.1.0",
+  "adonis-version": "4.1.0",
+  "description": "Clasification text with LSTM Recurrent Neural Network",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node ace test"
+  },
+  "keywords": [
+    "adonisjs",
+    "adonis-app",
+    "clasification",
+    "depp-learning",
+    "lstm",
+    "rnn"
+  ],
+  "author": "annurkhozin@gmail.com",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "@adonisjs/ace": "^5.0.8",
+    "@adonisjs/auth": "^3.0.7",
+    "@adonisjs/bodyparser": "^2.0.5",
+    "@adonisjs/cors": "^1.0.7",
+    "@adonisjs/drive": "^1.0.4",
+    "@adonisjs/fold": "^4.0.9",
+    "@adonisjs/framework": "^5.0.9",
+    "@adonisjs/ignitor": "^2.0.8",
+    "@adonisjs/lucid": "^6.1.3",
+    "@adonisjs/session": "^1.0.27",
+    "@adonisjs/shield": "^1.0.8",
+    "@tensorflow/tfjs-node": "^2.0.1",
+    "archiver": "^4.0.1",
+    "axios": "^0.19.2",
+    "cheerio": "^1.0.0-rc.3",
+    "md5": "^2.2.1",
+    "ml-confusion-matrix": "^0.4.0",
+    "mysql": "^2.18.1",
+    "sastrawijs": "^1.0.3",
+    "unzipper": "^0.10.11"
+  },
+  "devDependencies": {},
+  "autoload": {
+    "App": "./app"
+  }
+}

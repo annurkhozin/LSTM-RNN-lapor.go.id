@@ -1,0 +1,148 @@
+<nav class="navbar navbar-expand-sm container fixed-top navbar-light bg-white">
+    <a class="navbar-brand" href="#/">LAPOR!</a>
+    <div class="navbar-toggler" onclick="menuDialog()" >
+        <i data-feather="grid"></i>
+    </div>
+  
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="menu nav-link" href="javascript:void(0)" onclick="menuDialog()">
+                    <i data-feather="grid"></i> Menu
+                </a>
+            </li>
+        </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li class="nav-item status-scraping">
+                
+        </li>
+        <li>
+            <a class="menu nav-link" href="javascript:void(0)">
+                <i class="icofont-business-man-alt-1 icofont-1x"></i> {{ session_nama }}
+            </a>
+        </li>
+        <li>
+            <a class="menu nav-link" href="javascript:void(0)" onclick="keluarAkun()">
+                <i class='icofont-power icofont-1x'></i> Keluar
+            </a>
+        </li>
+      </ul>
+    </div>
+</nav>
+<br>
+<br>
+<div class="row">
+    <div class="col-md-12 col-xs-12">
+        <div class="box-content">
+            <div class="header-title  text-center current-page">
+                <h4>Selamat Datang</h4>
+            </div>
+            
+            @!section('content')
+
+        </div>              
+    </div>
+</div>
+
+<div class="modal fade menu-dialog">
+    <div class="modal-dialog">
+        <div class="modal-content text-center ">   
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title text-center col-md-12">Menu Navigasi</h4>
+            </div>
+            <!-- Modal body -->
+            <div class="modal-body">
+                <div class="row" style="padding:1rem 0rem 1rem 0rem;">
+                    <div class="col-4 col-md-4">
+                        <a href="#/apps?page=scraping-dataset" class="btn menu">
+                            <i class="icofont-mining icofont-3x text-success"></i>
+                            <div class="caption">
+                                <p>Scraping</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-4 col-md-4">
+                        <a href="#/apps?page=dataset" class="btn menu">
+                            <i class="icofont-prescription icofont-3x text-success"></i>
+                            <div class="caption">
+                                <p>Dataset</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-4 col-md-4">
+                        <a href="#/apps?page=kamus" class="btn menu">
+                            <i class="icofont-book-alt icofont-3x text-success"></i>
+                            <div class="caption">
+                                <p>Kamus</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div class="row"  style="padding:1rem 0rem 1rem 0rem;">
+                    <div class="col-4 col-md-4">
+                        <a href="#/apps?page=lstm-rnn" class="btn menu">
+                            <i class="icofont-electron icofont-3x text-success"></i>
+                            <div class="caption">
+                                <p>LSTM-RNN</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-4 col-md-4">
+                        <a href="#/apps?page=model-klasifikasi" class="btn menu">
+                            <i class="icofont-dna icofont-3x text-success"></i>
+                            <div class="caption">
+                                <p>Model</p>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-4 col-md-4">
+                        <a href="#/apps?page=web-api" class="btn menu">
+                            <i class="icofont-ui-browser icofont-3x text-success"></i>
+                            <div class="caption">
+                                <p>API</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+                         
+        </div>
+    </div>
+</div>
+<script>
+
+    feather.replace()
+    $('[data-toggle="tooltip"]').tooltip()
+
+    $(".menu").click(function(){
+        $('.menu-dialog').modal("hide");
+    })
+
+    function  menuDialog() {
+        $('.menu-dialog').modal("show")
+    }
+
+    function keluarAkun(){
+        var r = confirm("Keluar dari akun")
+        if (r == true) {
+            $.ajax({
+                url: "logout",
+                method:"GET",
+                cache:false,
+                success:function(resp){
+                if(resp['status']){
+                    message('info',resp['message'])
+                    setTimeout(
+                        "sammyApp.refresh()"
+                        ,2000)
+                }else{
+                    message('error',resp['message'])
+                }
+                }, error: function (status) {
+                    
+                }
+            })
+        }
+    }
+</script>

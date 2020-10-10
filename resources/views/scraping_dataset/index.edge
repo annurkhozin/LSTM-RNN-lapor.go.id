@@ -1,0 +1,263 @@
+@layout('template')
+
+@section('content')
+
+<div class="row">
+    <div class="col-md-12 col-xs-12">
+        <div class="box-content">
+            <div class="alert alert-warning" role="alert">
+                <i class="icofont-info-circle"></i> <i>Scraping</i> data di ambil dari laman <a href="https://www.lapor.go.id/laporan" target="_blank">www.lapor.go.id/laporan</a> pada periode 2015 - 2019, Klik <span class="btn" style="cursor:pointer;" onclick="reloadData()"><i class="icofont-refresh"></i> <i> Refesh</i></span> untuk memperbaharui data.
+            </div>
+            <table style="font-size:14px;" class="table table-striped table-bordered datatable" style="width:100%">
+                <thead>
+                    <tr>
+                        <th class="text-center">ID</th>
+                        <th>Pelapor</th>
+                        <th>Judul Laporan</th>
+                        <th>Instansi</th>
+                        <th>Tangal</th>
+                        <th class="text-center">Isi <i class="icofont-info-circle" data-toggle="tooltip" data-placement="top" title="Hijau: belum menjadi dataset, Merah: merupakan dataset"></i></th>
+                    </tr>
+                </thead>
+            </table>
+        </div>              
+    </div>
+</div>
+<div class="modal fade menu-dialog-laporan">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Modal body -->
+            <div class="modal-body">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <section class="post-heading">
+                            <div class="row">
+                                <div class="col-md-11">
+                                    <div class="media">
+                                        <div class="media-body">
+                                            <a href="#"  class="anchor-username url_laporan" target="_blank"><h5 class="media-heading lapor_id">...</h5></a>
+                                            <a href="javascript:void(0)" class="anchor-time"><i class="icofont-building-alt"></i> <span class="instansi">...</span></a>
+                                            <hr>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <section class="post-body">
+                            <p class="isi_laporan">...</p>
+                        </section>
+                        <section class="post-footer action-data">
+                            <hr>
+                            <div class="post-footer-option col-xs-12 text-center">
+                                <input type="hidden" class="lapor_id">
+                                <button type="button" class="btn btn-primary col-sm-8" onclick="addToDataset()">Jadikan Dataset</button>
+                                <button type="button" class="btn btn-outline-danger col-sm-2" onclick="deleteScrapingData()">Hapus</button>
+                            </div>
+                            
+                        </section>
+                    </div>
+                </div>
+            </div>
+                         
+        </div>
+    </div>
+</div>
+<script>
+    var start_scraping = '<a class="menu nav-link" href="javascript:void(0)" onclick="actionScraping(1)">'
+                +'<i class="icofont-play-alt-2 icofont-1x"></i> Mulai <i>Scraping</i>'
+                +'</a>';
+    var end_scraping = '<a class="menu nav-link" href="javascript:void(0)" onclick="actionScraping(0)">'
+                +'<div class="spinner-border text-primary spinner-border-sm" role="status"><span class="sr-only">Loading...</span></div> Akhiri <i>Scraping</i>'
+                +'</a>';
+    if(scraping_status){
+        $('.status-scraping').html(end_scraping);
+    }else{
+        $('.status-scraping').html(start_scraping);
+    }
+    var table = $('.datatable').DataTable( {
+            "processing": true,
+            "serverSide": true,
+            "stateSave": true,
+            "ajax": "scrapingData" ,
+            "aoColumns": [
+                { "data": "lapor_id" },
+                { "data": "user_pelapor" },
+                { "data": "judul_laporan" },
+                { "data": "instansi_laporan" },
+                { "data": "tgl_laporan" },
+                {
+                    "mData": "dataset",
+                    "mRender": function (data, type, row) {
+                        var color = ""
+                        if(data>0){
+                            color = "text-danger"
+                        }else{
+                            color = "text-success"
+                        }
+                        return '<div class="text-center">'
+                                    +'<span class="d-none lapor_id'+row._id+'">'+row.lapor_id+'</span>'
+                                    +'<span class="d-none is_dataset'+row._id+'">'+data+'</span>'
+                                    +'<span class="d-none instansi_laporan'+row._id+'">'+row.instansi_laporan+'</span>'
+                                    +'<span class="d-none url_laporan'+row._id+'">'+row.url_laporan+'</span>'
+                                    +'<span class="d-none isi_laporan'+row._id+'">'+row.isi_laporan+'</span>'
+                                    +'<a href="javascript:void(0)" class="'+color+'" onclick="detailLaporan(&#39;'+row._id+'&#39;)"><i class="icofont-prescription icofont-2x"></i></a>'
+                                +'</div>';
+                    }
+                }
+            ]           
+        });
+
+    let callServerStatus = localStorage.getItem("callServerStatus");
+
+    if(callServerStatus=='false'){
+        localStorage.setItem("callServerStatus",true);
+        workerScraping();
+        scrapingStatus();
+    }
+
+    function scrapingStatus(){
+        if(current_page=='scraping-dataset'){
+            $.ajax({
+                url: "scrapingStatus",
+                method:"get",
+                cache:false,
+                success:function(resp){
+                    setTimeout(scrapingStatus,30000);
+                    scraping_status = parseInt(resp['status']);
+                    if(scraping_status){
+                        $('.status-scraping').html(end_scraping);
+                    }else{
+                        $('.status-scraping').html(start_scraping);
+                    }
+                }, error:function(err){
+                    setTimeout(scrapingStatus,10000);
+                }
+            })
+        }
+    }
+    
+    function workerScraping(){
+        $.ajax({
+            url: "workerScraping",
+            method:"GET",
+            cache:false,
+            success:function(resp){
+                
+            }
+        })
+    }
+
+    function reloadData(){
+        table.ajax.reload( null, false );
+    }
+
+
+    function actionScraping(status){
+        var msg
+        if(status){
+            msg = "Mulai scraping di situs www.lapor.go.id ?";
+        }else{
+            msg = "Akhiri scraping di situs www.lapor.go.id ?";
+        }
+        var r = confirm(msg)
+        if (r == true) {
+            const data = {
+                scraping_status : status
+            }
+            if(status){
+                $('.status-scraping').html(end_scraping);
+            }else{
+                $('.status-scraping').html(start_scraping);
+            }
+            $.ajax({
+                url: "actionScraping",
+                method:"GET",
+                data: data,
+                async: true,
+                cache:false,
+                success:function(resp){
+                    if(scraping_status != parseInt(resp['status'])){
+                        scraping_status = parseInt(resp['status']);
+                        if(scraping_status){
+                            $('.status-scraping').html(end_scraping);
+                        }else{
+                            $('.status-scraping').html(start_scraping);
+                        }
+                    }
+                }
+            })
+        }
+        
+    }
+    var current_id
+    var current_isi_laporan
+    var current_instansi_laporan
+    function detailLaporan(id){
+        current_id = id;
+        current_isi_laporan = $('.isi_laporan'+id).html();
+        current_instansi_laporan = $('.instansi_laporan'+id).html();
+
+        $('.url_laporan').attr("href", $('.url_laporan'+id).html());
+        $('.instansi').html($('.instansi_laporan'+id).html());
+        $('.lapor_id').html($('.lapor_id'+id).html());
+        $('.isi_laporan').html($('.isi_laporan'+id).html());
+        var is_dataset = $('.is_dataset'+id).html();
+
+        if(is_dataset=="0"){
+            $('.action-data').show();
+        }else{
+            $('.action-data').hide();
+        }
+        $('.menu-dialog-laporan').modal("show");
+    }
+    function deleteScrapingData(){
+        var r = confirm("Hapus data hasil scraping?")
+        if (r == true) {
+            const data = {
+                _id     : current_id
+            }
+            $.ajax({
+                url: "scraping-dataset",
+                method:"DELETE",
+                data: data,
+                cache:false,
+                success:function(resp){
+                    if(resp['status']){
+                        message('info',resp['message']);
+                        $('.menu-dialog-laporan').modal("hide");
+                        sammyApp.refresh();
+                    }else{
+                        message('error',resp['message']);
+                    }
+                }
+            });
+        }
+    }
+
+    function addToDataset(){
+        var r = confirm("Tambahkan sebagai Dataset?");
+        if (r == true) {
+            const data = {
+                teks     : current_isi_laporan,
+                kelas     : current_instansi_laporan,
+                scraping_id     : current_id
+            }
+            $.ajax({
+                url: "dataset",
+                method:"POST",
+                data: data,
+                cache:false,
+                success:function(resp){
+                    if(resp['status']){
+                        message('info',resp['message']);
+                        $('.menu-dialog-laporan').modal("hide");
+                        reloadData();
+                    }else{
+                        message('error',resp['message']);
+                    }
+                }
+            })
+        }
+    }
+</script>
+@endsection
