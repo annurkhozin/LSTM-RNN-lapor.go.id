@@ -1,13 +1,10 @@
 ## Setup
 
-Use the adonis command to install the blueprint
+Use the npm command to install package
 
 ```bash
-adonis new yardstick
+npm install
 ```
-
-or manually clone the repo and then run `npm install`.
-
 
 ### Migrations
 
