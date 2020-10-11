@@ -23,8 +23,3 @@ adonis serve --dev
 ```
 or use `node server.js`.
 
-## View more
-
-* [Reference](https://pedroslopez.me/whatsapp-web.js)
-* [Guide](https://waguide.pedroslopez.me/) _(work in progress)_
-* [GitHub](https://github.com/pedroslopez/whatsapp-web.js)
